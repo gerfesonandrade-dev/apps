@@ -225,6 +225,19 @@ function gerarLinksCategorias(contagem, categoriaAtual, buscaAtual) {
   return html;
 }
 
+function gerarResumoCategoria(categoria) {
+  const mapa = {
+    Receita: "Ingredientes, pratos, sobremesas e ideias culinárias.",
+    Construção: "Materiais, acabamentos, bancadas, pisos e execução.",
+    Decoração: "Ambientes, referências visuais, estilo e composição.",
+    Organização: "Soluções práticas para arrumação e otimização.",
+    DIY: "Projetos manuais, passo a passo e faça você mesmo.",
+    Outros: "Referências diversas salvas no seu cofre."
+  };
+
+  return mapa[categoria] || "Referências organizadas no Ideavault.";
+}
+
 function gerarHTMLIdeias(ideias, categoriaAtual = "", buscaAtual = "") {
   const contagem = contarPorCategoria(ideias);
 
@@ -241,19 +254,41 @@ function gerarHTMLIdeias(ideias, categoriaAtual = "", buscaAtual = "") {
     );
   }
 
+  const destaqueTitulo = categoriaAtual
+    ? categoriaAtual
+    : "Galeria de ideias";
+
+  const destaqueResumo = buscaAtual
+    ? `Resultados relacionados a "${escapeHtml(buscaAtual)}".`
+    : categoriaAtual
+      ? gerarResumoCategoria(categoriaAtual)
+      : "Explore suas ideias salvas em um mural visual organizado por categoria.";
+
   const cards = ideiasFiltradas
     .slice()
     .reverse()
-    .map((i) => `
-      <div class="card">
-        <div class="topo-card">
-          <span class="tag tipo">${escapeHtml(i.tipo || "sem tipo")}</span>
-          <span class="tag categoria">${escapeHtml(i.categoria || "Sem categoria")}</span>
-        </div>
-        <div class="conteudo">${escapeHtml(i.conteudo || "")}</div>
-        <div class="data">${i.data ? new Date(i.data).toLocaleString("pt-BR") : ""}</div>
-      </div>
-    `)
+    .map((i, index) => {
+      const tamanhos = ["alto", "medio", "baixo"];
+      const tamanho = tamanhos[index % 3];
+
+      return `
+        <article class="pin ${tamanho}">
+          <div class="pin-topo">
+            <span class="tag tipo">${escapeHtml(i.tipo || "sem tipo")}</span>
+            <span class="tag categoria">${escapeHtml(i.categoria || "Sem categoria")}</span>
+          </div>
+
+          <div class="pin-conteudo">
+            <h3>${escapeHtml(i.categoria || "Ideia")}</h3>
+            <p>${escapeHtml(i.conteudo || "")}</p>
+          </div>
+
+          <div class="pin-rodape">
+            <span>${i.data ? new Date(i.data).toLocaleString("pt-BR") : ""}</span>
+          </div>
+        </article>
+      `;
+    })
     .join("");
 
   return `
@@ -272,173 +307,215 @@ function gerarHTMLIdeias(ideias, categoriaAtual = "", buscaAtual = "") {
       body {
         margin: 0;
         font-family: Arial, sans-serif;
-        background: #f4f7fb;
-        color: #1f2937;
+        background: #f7f7f7;
+        color: #111827;
       }
 
-      header {
-        background: #0f172a;
-        color: white;
-        padding: 24px;
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        background: rgba(255,255,255,0.95);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid #ececec;
       }
 
-      .header-inner {
-        max-width: 1200px;
+      .topbar-inner {
+        max-width: 1400px;
         margin: 0 auto;
+        padding: 14px 20px;
         display: flex;
         align-items: center;
-        justify-content: center;
-        gap: 16px;
+        gap: 14px;
         flex-wrap: wrap;
-        text-align: center;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 220px;
       }
 
       .logo {
-        width: 58px;
-        height: 58px;
+        width: 44px;
+        height: 44px;
         object-fit: contain;
-        border-radius: 14px;
-        background: rgba(255,255,255,0.08);
-        padding: 8px;
+        border-radius: 12px;
+        background: #0f172a;
+        padding: 6px;
       }
 
-      .header-text h1 {
-        margin: 0;
-        font-size: 32px;
-      }
-
-      .header-text p {
-        margin: 8px 0 0;
-        color: #cbd5e1;
-      }
-
-      .container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 24px;
-      }
-
-      .topo-info {
-        display: flex;
-        gap: 16px;
-        flex-wrap: wrap;
-        margin-bottom: 20px;
-      }
-
-      .box {
-        background: #fff;
-        border-radius: 14px;
-        padding: 16px 18px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        min-width: 180px;
-      }
-
-      .box strong {
+      .brand strong {
         display: block;
-        font-size: 24px;
-        margin-bottom: 6px;
+        font-size: 18px;
       }
 
-      .busca-box {
-        background: #fff;
-        border-radius: 16px;
-        padding: 16px;
-        margin-bottom: 20px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      .brand span {
+        display: block;
+        font-size: 12px;
+        color: #6b7280;
       }
 
-      .busca-form {
+      .search-wrap {
+        flex: 1;
+        min-width: 260px;
+      }
+
+      .search-form {
         display: flex;
         gap: 10px;
         flex-wrap: wrap;
       }
 
-      .busca-form input {
+      .search-form input {
         flex: 1;
-        min-width: 220px;
-        padding: 12px 14px;
-        border: 1px solid #d1d5db;
-        border-radius: 10px;
+        min-width: 180px;
+        border: none;
+        outline: none;
+        background: #efefef;
+        border-radius: 999px;
+        padding: 14px 18px;
         font-size: 14px;
       }
 
-      .busca-form button,
-      .limpar-btn {
-        padding: 12px 16px;
+      .search-form button,
+      .clear-btn {
         border: none;
-        border-radius: 10px;
+        border-radius: 999px;
+        padding: 12px 16px;
         font-size: 14px;
         cursor: pointer;
         text-decoration: none;
       }
 
-      .busca-form button {
-        background: #0f172a;
+      .search-form button {
+        background: #111827;
         color: white;
       }
 
-      .limpar-btn {
+      .clear-btn {
         background: #e5e7eb;
         color: #111827;
-        display: inline-flex;
-        align-items: center;
+      }
+
+      .hero {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 28px 20px 8px;
+      }
+
+      .hero-box {
+        background: white;
+        border-radius: 28px;
+        padding: 28px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+      }
+
+      .hero h1 {
+        margin: 0 0 10px;
+        font-size: 48px;
+        line-height: 1.05;
+      }
+
+      .hero p {
+        margin: 0;
+        font-size: 18px;
+        color: #4b5563;
+        max-width: 820px;
+      }
+
+      .hero-meta {
+        margin-top: 18px;
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .meta-pill {
+        background: #f3f4f6;
+        color: #111827;
+        border-radius: 999px;
+        padding: 10px 14px;
+        font-size: 14px;
+        font-weight: 600;
+      }
+
+      .filtros-wrap {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 18px 20px 8px;
       }
 
       .filtros {
         display: flex;
         flex-wrap: wrap;
         gap: 10px;
-        margin-bottom: 24px;
       }
 
       .filtro {
         text-decoration: none;
         background: #ffffff;
-        color: #0f172a;
-        border: 1px solid #dbe3ee;
-        padding: 10px 14px;
+        color: #111827;
+        border: 1px solid #e5e7eb;
+        padding: 11px 16px;
         border-radius: 999px;
         font-size: 14px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        font-weight: 600;
       }
 
       .filtro.ativo {
-        background: #0f172a;
-        color: #fff;
-        border-color: #0f172a;
+        background: #111827;
+        color: white;
+        border-color: #111827;
       }
 
-      .subtitulo {
-        margin-bottom: 18px;
-        font-size: 18px;
-        font-weight: bold;
+      .galeria-wrap {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 16px 20px 40px;
       }
 
-      .grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 18px;
+      .galeria {
+        column-count: 5;
+        column-gap: 18px;
       }
 
-      .card {
-        background: #fff;
-        border-radius: 16px;
-        padding: 18px;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-        border: 1px solid #e5e7eb;
+      .pin {
+        display: inline-block;
+        width: 100%;
+        margin: 0 0 18px;
+        background: white;
+        border-radius: 22px;
+        padding: 16px;
+        box-shadow: 0 6px 24px rgba(0,0,0,0.06);
+        border: 1px solid #ececec;
+        break-inside: avoid;
       }
 
-      .topo-card {
+      .pin.alto .pin-conteudo p {
+        min-height: 140px;
+      }
+
+      .pin.medio .pin-conteudo p {
+        min-height: 90px;
+      }
+
+      .pin.baixo .pin-conteudo p {
+        min-height: 50px;
+      }
+
+      .pin-topo {
         display: flex;
         justify-content: space-between;
-        gap: 10px;
+        gap: 8px;
         flex-wrap: wrap;
         margin-bottom: 14px;
       }
 
       .tag {
-        font-size: 12px;
-        font-weight: bold;
+        font-size: 11px;
+        font-weight: 700;
         padding: 6px 10px;
         border-radius: 999px;
       }
@@ -453,94 +530,135 @@ function gerarHTMLIdeias(ideias, categoriaAtual = "", buscaAtual = "") {
         color: #92400e;
       }
 
-      .conteudo {
-        font-size: 16px;
-        line-height: 1.5;
-        margin-bottom: 16px;
+      .pin-conteudo h3 {
+        margin: 0 0 10px;
+        font-size: 20px;
+        line-height: 1.2;
+      }
+
+      .pin-conteudo p {
+        margin: 0;
+        color: #374151;
+        line-height: 1.6;
         white-space: pre-wrap;
       }
 
-      .data {
+      .pin-rodape {
+        margin-top: 16px;
         font-size: 12px;
         color: #6b7280;
       }
 
       .vazio {
         background: white;
-        border-radius: 16px;
+        border-radius: 22px;
         padding: 40px;
         text-align: center;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+        box-shadow: 0 6px 24px rgba(0,0,0,0.06);
       }
 
-      @media (max-width: 640px) {
-        .header-inner {
-          flex-direction: column;
+      @media (max-width: 1200px) {
+        .galeria {
+          column-count: 4;
+        }
+      }
+
+      @media (max-width: 900px) {
+        .hero h1 {
+          font-size: 36px;
         }
 
-        .header-text h1 {
+        .galeria {
+          column-count: 3;
+        }
+      }
+
+      @media (max-width: 680px) {
+        .hero h1 {
           font-size: 28px;
         }
 
-        .logo {
-          width: 64px;
-          height: 64px;
+        .hero p {
+          font-size: 15px;
+        }
+
+        .galeria {
+          column-count: 2;
+        }
+      }
+
+      @media (max-width: 460px) {
+        .galeria {
+          column-count: 1;
+        }
+
+        .topbar-inner {
+          padding: 12px 14px;
+        }
+
+        .hero,
+        .filtros-wrap,
+        .galeria-wrap {
+          padding-left: 14px;
+          padding-right: 14px;
         }
       }
     </style>
   </head>
   <body>
-    <header>
-      <div class="header-inner">
-        <img class="logo" src="${LOGO_URL}" alt="Logo Ideavault" />
-        <div class="header-text">
-          <h1>Ideavault</h1>
-          <p>Seu cofre inteligente de ideias</p>
+    <div class="topbar">
+      <div class="topbar-inner">
+        <div class="brand">
+          <img class="logo" src="${LOGO_URL}" alt="Logo Ideavault" />
+          <div>
+            <strong>Ideavault</strong>
+            <span>Seu cofre inteligente de ideias</span>
+          </div>
+        </div>
+
+        <div class="search-wrap">
+          <form class="search-form" method="GET" action="/ideavault/ideias">
+            ${categoriaAtual ? `<input type="hidden" name="categoria" value="${escapeHtml(categoriaAtual)}" />` : ""}
+            <input
+              type="text"
+              name="busca"
+              placeholder="Pesquise receitas, construção, decoração..."
+              value="${escapeHtml(buscaAtual)}"
+            />
+            <button type="submit">Buscar</button>
+            <a class="clear-btn" href="/ideavault/ideias">Limpar</a>
+          </form>
         </div>
       </div>
-    </header>
+    </div>
 
-    <div class="container">
-      <div class="topo-info">
-        <div class="box">
-          <strong>${ideias.length}</strong>
-          <span>Total de ideias</span>
-        </div>
-        <div class="box">
-          <strong>${ideiasFiltradas.length}</strong>
-          <span>${categoriaAtual ? `Itens em ${escapeHtml(categoriaAtual)}` : "Itens exibidos"}</span>
+    <section class="hero">
+      <div class="hero-box">
+        <h1>${escapeHtml(destaqueTitulo)}.</h1>
+        <p>${destaqueResumo}</p>
+
+        <div class="hero-meta">
+          <span class="meta-pill">${ideias.length} ideias salvas</span>
+          <span class="meta-pill">${ideiasFiltradas.length} ideias exibidas</span>
+          ${categoriaAtual ? `<span class="meta-pill">Categoria: ${escapeHtml(categoriaAtual)}</span>` : ""}
+          ${buscaAtual ? `<span class="meta-pill">Busca: ${escapeHtml(buscaAtual)}</span>` : ""}
         </div>
       </div>
+    </section>
 
-      <div class="busca-box">
-        <form class="busca-form" method="GET" action="/ideavault/ideias">
-          ${categoriaAtual ? `<input type="hidden" name="categoria" value="${escapeHtml(categoriaAtual)}" />` : ""}
-          <input
-            type="text"
-            name="busca"
-            placeholder="Buscar por conteúdo, categoria ou tipo..."
-            value="${escapeHtml(buscaAtual)}"
-          />
-          <button type="submit">Buscar</button>
-          <a class="limpar-btn" href="/ideavault/ideias">Limpar</a>
-        </form>
-      </div>
-
+    <section class="filtros-wrap">
       <div class="filtros">
         ${gerarLinksCategorias(contagem, categoriaAtual, buscaAtual)}
       </div>
+    </section>
 
-      <div class="subtitulo">
-        ${categoriaAtual ? `Categoria: ${escapeHtml(categoriaAtual)}` : "Todas as ideias"}
-        ${buscaAtual ? ` • Busca: "${escapeHtml(buscaAtual)}"` : ""}
-      </div>
-
+    <section class="galeria-wrap">
       ${
         ideiasFiltradas.length === 0
           ? `<div class="vazio">Nenhuma ideia encontrada com esse filtro.</div>`
-          : `<div class="grid">${cards}</div>`
+          : `<div class="galeria">${cards}</div>`
       }
-    </div>
+    </section>
   </body>
   </html>
   `;
@@ -554,7 +672,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/ideavault", (req, res) => {
-  res.send("Ideavault rodando 🚀");
+  res.redirect("/ideavault/ideias");
 });
 
 app.get("/ideias", (req, res) => {
