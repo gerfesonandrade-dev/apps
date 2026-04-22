@@ -11,6 +11,9 @@ const TELEGRAM_API = `https://api.telegram.org/bot${TOKEN}`;
 const DATA_FILE = "data.json";
 const PENDING_FILE = "pending.json";
 
+const LOGO_URL = "https://apps.linhacriativa.com/img/logo.png";
+const FAVICON_URL = "https://apps.linhacriativa.com/img/icone.ico";
+
 // ========================
 // UTIL
 // ========================
@@ -188,20 +191,33 @@ function escapeHtml(texto = "") {
   return texto
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }
 
-function gerarLinksCategorias(contagem, categoriaAtual) {
+function gerarLinksCategorias(contagem, categoriaAtual, buscaAtual) {
   const categoriasOrdenadas = Object.entries(contagem).sort((a, b) => a[0].localeCompare(b[0]));
+  const total = Object.values(contagem).reduce((a, b) => a + b, 0);
+
+  const baseTodas = buscaAtual
+    ? `/ideavault/ideias?busca=${encodeURIComponent(buscaAtual)}`
+    : `/ideavault/ideias`;
 
   let html = `
-    <a class="filtro ${!categoriaAtual ? "ativo" : ""}" href="/ideavault/ideias">Todas (${Object.values(contagem).reduce((a, b) => a + b, 0)})</a>
+    <a class="filtro ${!categoriaAtual ? "ativo" : ""}" href="${baseTodas}">
+      Todas (${total})
+    </a>
   `;
 
-  categoriasOrdenadas.forEach(([categoria, total]) => {
+  categoriasOrdenadas.forEach(([categoria, totalCategoria]) => {
+    let href = `/ideavault/ideias?categoria=${encodeURIComponent(categoria)}`;
+    if (buscaAtual) {
+      href += `&busca=${encodeURIComponent(buscaAtual)}`;
+    }
+
     html += `
-      <a class="filtro ${categoriaAtual === categoria ? "ativo" : ""}" href="/ideavault/ideias?categoria=${encodeURIComponent(categoria)}">
-        ${categoria} (${total})
+      <a class="filtro ${categoriaAtual === categoria ? "ativo" : ""}" href="${href}">
+        ${escapeHtml(categoria)} (${totalCategoria})
       </a>
     `;
   });
@@ -209,11 +225,21 @@ function gerarLinksCategorias(contagem, categoriaAtual) {
   return html;
 }
 
-function gerarHTMLIdeias(ideias, categoriaAtual = "") {
+function gerarHTMLIdeias(ideias, categoriaAtual = "", buscaAtual = "") {
   const contagem = contarPorCategoria(ideias);
-  const ideiasFiltradas = categoriaAtual
+
+  let ideiasFiltradas = categoriaAtual
     ? ideias.filter((i) => (i.categoria || "") === categoriaAtual)
-    : ideias;
+    : [...ideias];
+
+  if (buscaAtual) {
+    const termo = buscaAtual.toLowerCase();
+    ideiasFiltradas = ideiasFiltradas.filter((i) =>
+      (i.conteudo || "").toLowerCase().includes(termo) ||
+      (i.categoria || "").toLowerCase().includes(termo) ||
+      (i.tipo || "").toLowerCase().includes(termo)
+    );
+  }
 
   const cards = ideiasFiltradas
     .slice()
@@ -237,6 +263,7 @@ function gerarHTMLIdeias(ideias, categoriaAtual = "") {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Ideavault</title>
+    <link rel="icon" type="image/x-icon" href="${FAVICON_URL}" />
     <style>
       * {
         box-sizing: border-box;
@@ -253,15 +280,34 @@ function gerarHTMLIdeias(ideias, categoriaAtual = "") {
         background: #0f172a;
         color: white;
         padding: 24px;
+      }
+
+      .header-inner {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        flex-wrap: wrap;
         text-align: center;
       }
 
-      header h1 {
+      .logo {
+        width: 58px;
+        height: 58px;
+        object-fit: contain;
+        border-radius: 14px;
+        background: rgba(255,255,255,0.08);
+        padding: 8px;
+      }
+
+      .header-text h1 {
         margin: 0;
         font-size: 32px;
       }
 
-      header p {
+      .header-text p {
         margin: 8px 0 0;
         color: #cbd5e1;
       }
@@ -291,6 +337,51 @@ function gerarHTMLIdeias(ideias, categoriaAtual = "") {
         display: block;
         font-size: 24px;
         margin-bottom: 6px;
+      }
+
+      .busca-box {
+        background: #fff;
+        border-radius: 16px;
+        padding: 16px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      }
+
+      .busca-form {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .busca-form input {
+        flex: 1;
+        min-width: 220px;
+        padding: 12px 14px;
+        border: 1px solid #d1d5db;
+        border-radius: 10px;
+        font-size: 14px;
+      }
+
+      .busca-form button,
+      .limpar-btn {
+        padding: 12px 16px;
+        border: none;
+        border-radius: 10px;
+        font-size: 14px;
+        cursor: pointer;
+        text-decoration: none;
+      }
+
+      .busca-form button {
+        background: #0f172a;
+        color: white;
+      }
+
+      .limpar-btn {
+        background: #e5e7eb;
+        color: #111827;
+        display: inline-flex;
+        align-items: center;
       }
 
       .filtros {
@@ -381,12 +472,32 @@ function gerarHTMLIdeias(ideias, categoriaAtual = "") {
         text-align: center;
         box-shadow: 0 4px 16px rgba(0,0,0,0.08);
       }
+
+      @media (max-width: 640px) {
+        .header-inner {
+          flex-direction: column;
+        }
+
+        .header-text h1 {
+          font-size: 28px;
+        }
+
+        .logo {
+          width: 64px;
+          height: 64px;
+        }
+      }
     </style>
   </head>
   <body>
     <header>
-      <h1>🚀 Ideavault</h1>
-      <p>Seu cofre inteligente de ideias</p>
+      <div class="header-inner">
+        <img class="logo" src="${LOGO_URL}" alt="Logo Ideavault" />
+        <div class="header-text">
+          <h1>Ideavault</h1>
+          <p>Seu cofre inteligente de ideias</p>
+        </div>
+      </div>
     </header>
 
     <div class="container">
@@ -397,21 +508,36 @@ function gerarHTMLIdeias(ideias, categoriaAtual = "") {
         </div>
         <div class="box">
           <strong>${ideiasFiltradas.length}</strong>
-          <span>${categoriaAtual ? `Itens em ${categoriaAtual}` : "Itens exibidos"}</span>
+          <span>${categoriaAtual ? `Itens em ${escapeHtml(categoriaAtual)}` : "Itens exibidos"}</span>
         </div>
       </div>
 
+      <div class="busca-box">
+        <form class="busca-form" method="GET" action="/ideavault/ideias">
+          ${categoriaAtual ? `<input type="hidden" name="categoria" value="${escapeHtml(categoriaAtual)}" />` : ""}
+          <input
+            type="text"
+            name="busca"
+            placeholder="Buscar por conteúdo, categoria ou tipo..."
+            value="${escapeHtml(buscaAtual)}"
+          />
+          <button type="submit">Buscar</button>
+          <a class="limpar-btn" href="/ideavault/ideias">Limpar</a>
+        </form>
+      </div>
+
       <div class="filtros">
-        ${gerarLinksCategorias(contagem, categoriaAtual)}
+        ${gerarLinksCategorias(contagem, categoriaAtual, buscaAtual)}
       </div>
 
       <div class="subtitulo">
         ${categoriaAtual ? `Categoria: ${escapeHtml(categoriaAtual)}` : "Todas as ideias"}
+        ${buscaAtual ? ` • Busca: "${escapeHtml(buscaAtual)}"` : ""}
       </div>
 
       ${
         ideiasFiltradas.length === 0
-          ? `<div class="vazio">Nenhuma ideia encontrada nesta categoria.</div>`
+          ? `<div class="vazio">Nenhuma ideia encontrada com esse filtro.</div>`
           : `<div class="grid">${cards}</div>`
       }
     </div>
@@ -434,13 +560,15 @@ app.get("/ideavault", (req, res) => {
 app.get("/ideias", (req, res) => {
   const ideias = lerIdeias();
   const categoria = req.query.categoria || "";
-  res.send(gerarHTMLIdeias(ideias, categoria));
+  const busca = req.query.busca || "";
+  res.send(gerarHTMLIdeias(ideias, categoria, busca));
 });
 
 app.get("/ideavault/ideias", (req, res) => {
   const ideias = lerIdeias();
   const categoria = req.query.categoria || "";
-  res.send(gerarHTMLIdeias(ideias, categoria));
+  const busca = req.query.busca || "";
+  res.send(gerarHTMLIdeias(ideias, categoria, busca));
 });
 
 // ========================
