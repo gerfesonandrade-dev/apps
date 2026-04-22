@@ -1,7 +1,7 @@
 {
   "name": "ideavault",
   "version": "1.0.0",
-  "description": "Bot Telegram do Ideavault",
+  "description": "Bot Telegram Ideavault",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
