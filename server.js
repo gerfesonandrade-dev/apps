@@ -8,25 +8,64 @@ app.use(express.json());
 const TOKEN = process.env.TELEGRAM_TOKEN;
 const TELEGRAM_API = `https://api.telegram.org/bot${TOKEN}`;
 const DATA_FILE = "data.json";
+const PENDING_FILE = "pending.json";
 
-function lerIdeias() {
-  if (!fs.existsSync(DATA_FILE)) {
+function lerJSON(arquivo) {
+  if (!fs.existsSync(arquivo)) {
     return [];
   }
 
   try {
-    const dados = fs.readFileSync(DATA_FILE, "utf8");
+    const dados = fs.readFileSync(arquivo, "utf8");
     return JSON.parse(dados || "[]");
   } catch (error) {
-    console.error("Erro ao ler data.json:", error);
+    console.error(`Erro ao ler ${arquivo}:`, error);
     return [];
   }
+}
+
+function salvarJSON(arquivo, dados) {
+  fs.writeFileSync(arquivo, JSON.stringify(dados, null, 2));
+}
+
+function lerIdeias() {
+  return lerJSON(DATA_FILE);
 }
 
 function salvarIdeia(ideia) {
   const dados = lerIdeias();
   dados.push(ideia);
-  fs.writeFileSync(DATA_FILE, JSON.stringify(dados, null, 2));
+  salvarJSON(DATA_FILE, dados);
+}
+
+function lerPendencias() {
+  return lerJSON(PENDING_FILE);
+}
+
+function salvarPendencias(pendencias) {
+  salvarJSON(PENDING_FILE, pendencias);
+}
+
+function setPendencia(chatId, tipoMidia) {
+  const pendencias = lerPendencias().filter((p) => p.chatId !== chatId);
+
+  pendencias.push({
+    chatId,
+    tipoMidia,
+    criadoEm: new Date().toISOString()
+  });
+
+  salvarPendencias(pendencias);
+}
+
+function buscarPendencia(chatId) {
+  const pendencias = lerPendencias();
+  return pendencias.find((p) => p.chatId === chatId);
+}
+
+function removerPendencia(chatId) {
+  const pendencias = lerPendencias().filter((p) => p.chatId !== chatId);
+  salvarPendencias(pendencias);
 }
 
 function detectarCategoria(texto) {
@@ -131,6 +170,18 @@ app.post("/webhook", async (req, res) => {
   const chatId = message.chat.id;
 
   try {
+    if (message.photo) {
+      setPendencia(chatId, "imagem");
+      await sendMessage(chatId, "📸 Imagem recebida!\nAgora me descreve essa ideia para eu salvar corretamente 👇");
+      return res.sendStatus(200);
+    }
+
+    if (message.video) {
+      setPendencia(chatId, "video");
+      await sendMessage(chatId, "🎥 Vídeo recebido!\nAgora me conta sobre essa ideia para eu salvar corretamente 👇");
+      return res.sendStatus(200);
+    }
+
     if (message.text) {
       const textoRecebido = message.text.trim();
 
@@ -161,6 +212,27 @@ app.post("/webhook", async (req, res) => {
         return res.sendStatus(200);
       }
 
+      const pendencia = buscarPendencia(chatId);
+
+      if (pendencia) {
+        const categoria = detectarCategoria(textoRecebido);
+
+        salvarIdeia({
+          tipo: pendencia.tipoMidia,
+          conteudo: textoRecebido,
+          categoria,
+          data: new Date().toISOString()
+        });
+
+        removerPendencia(chatId);
+
+        await sendMessage(
+          chatId,
+          `✅ ${pendencia.tipoMidia === "imagem" ? "Imagem" : "Vídeo"} salvo com descrição!\n📂 Categoria: ${categoria}`
+        );
+        return res.sendStatus(200);
+      }
+
       const categoria = detectarCategoria(textoRecebido);
 
       salvarIdeia({
@@ -174,28 +246,6 @@ app.post("/webhook", async (req, res) => {
         chatId,
         `💡 Ideia salva com sucesso!\n📂 Categoria: ${categoria}`
       );
-    }
-
-    if (message.photo) {
-      salvarIdeia({
-        tipo: "imagem",
-        conteudo: "imagem recebida",
-        categoria: "Pendente",
-        data: new Date().toISOString()
-      });
-
-      await sendMessage(chatId, "📸 Imagem salva! Categoria: Pendente\nMe descreve essa ideia 👇");
-    }
-
-    if (message.video) {
-      salvarIdeia({
-        tipo: "video",
-        conteudo: "vídeo recebido",
-        categoria: "Pendente",
-        data: new Date().toISOString()
-      });
-
-      await sendMessage(chatId, "🎥 Vídeo salvo! Categoria: Pendente\nMe conta sobre essa ideia 👇");
     }
   } catch (err) {
     console.error("Erro:", err.response?.data || err.message || err);
