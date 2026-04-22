@@ -11,8 +11,8 @@ const TELEGRAM_API = `https://api.telegram.org/bot${TOKEN}`;
 const DATA_FILE = "data.json";
 const PENDING_FILE = "pending.json";
 
-const LOGO_URL = "https://apps.linhacriativa.com/img/logo.png";
-const FAVICON_URL = "https://apps.linhacriativa.com/img/icone.ico";
+const LOGO_URL = "https://linhacriativa.com/img/logo_br.png";
+const FAVICON_URL = "https://linhacriativa.com/img/icone.ico";
 
 // ========================
 // UTIL
