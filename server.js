@@ -74,23 +74,27 @@ function detectarCategoria(texto) {
   const categorias = {
     Receita: [
       "receita", "bolo", "frango", "massa", "macarrão", "ingredientes",
-      "forno", "cozinha", "sobremesa", "molho", "tempero", "assado"
+      "forno", "cozinha", "sobremesa", "molho", "tempero", "assado",
+      "pizza", "pão", "doce", "brigadeiro", "torta", "lanche"
     ],
     Construção: [
       "cimento", "tijolo", "obra", "argamassa", "piso", "porcelanato",
-      "reboco", "construção", "parede", "telhado", "viga", "coluna", "cimento queimado"
+      "reboco", "construção", "parede", "telhado", "viga", "coluna",
+      "cimento queimado", "bancada", "cerâmica", "azulejo", "madeira", "armário"
     ],
     Decoração: [
       "decoração", "decorar", "sofá", "cortina", "tapete", "quadro",
-      "luminária", "estilo", "ambiente", "paleta", "mesa posta"
+      "luminária", "estilo", "ambiente", "paleta", "mesa posta",
+      "sala", "cozinha planejada", "painel", "vaso"
     ],
     Organização: [
       "organização", "organizar", "gaveta", "caixa", "prateleira",
-      "arrumação", "closet", "despensa", "setor", "agenda"
+      "arrumação", "closet", "despensa", "setor", "agenda",
+      "estoque", "separar", "categorizar"
     ],
     DIY: [
       "faça você mesmo", "diy", "artesanato", "manual", "montagem",
-      "passo a passo", "reciclagem", "pintura", "mdf"
+      "passo a passo", "reciclagem", "pintura", "mdf", "feito à mão"
     ]
   };
 
@@ -103,6 +107,39 @@ function detectarCategoria(texto) {
   }
 
   return "Outros";
+}
+
+function buscarIdeias(ideias, termo) {
+  const t = termo.toLowerCase();
+
+  return ideias.filter((ideia) => {
+    const conteudo = (ideia.conteudo || "").toLowerCase();
+    const categoria = (ideia.categoria || "").toLowerCase();
+    const tipo = (ideia.tipo || "").toLowerCase();
+
+    return (
+      conteudo.includes(t) ||
+      categoria.includes(t) ||
+      tipo.includes(t)
+    );
+  });
+}
+
+function formatarBusca(resultados, termo) {
+  if (resultados.length === 0) {
+    return `🔎 Nenhum resultado encontrado para: "${termo}"`;
+  }
+
+  let texto = `🔎 Resultados para "${termo}":\n\n`;
+
+  resultados
+    .slice(-10)
+    .reverse()
+    .forEach((ideia, index) => {
+      texto += `${index + 1}. [${ideia.tipo} | ${ideia.categoria}] ${ideia.conteudo}\n`;
+    });
+
+  return texto;
 }
 
 async function sendMessage(chatId, text) {
@@ -172,13 +209,19 @@ app.post("/webhook", async (req, res) => {
   try {
     if (message.photo) {
       setPendencia(chatId, "imagem");
-      await sendMessage(chatId, "📸 Imagem recebida!\nAgora me descreve essa ideia para eu salvar corretamente 👇");
+      await sendMessage(
+        chatId,
+        "📸 Imagem recebida!\nAgora me descreve essa ideia para eu salvar corretamente 👇"
+      );
       return res.sendStatus(200);
     }
 
     if (message.video) {
       setPendencia(chatId, "video");
-      await sendMessage(chatId, "🎥 Vídeo recebido!\nAgora me conta sobre essa ideia para eu salvar corretamente 👇");
+      await sendMessage(
+        chatId,
+        "🎥 Vídeo recebido!\nAgora me conta sobre essa ideia para eu salvar corretamente 👇"
+      );
       return res.sendStatus(200);
     }
 
@@ -188,7 +231,7 @@ app.post("/webhook", async (req, res) => {
       if (textoRecebido === "/start") {
         await sendMessage(
           chatId,
-          "🚀 Bem-vindo ao Ideavault!\n\nEnvie textos, imagens e vídeos para salvar suas ideias.\n\nComandos disponíveis:\n/listar - ver ideias salvas\n/total - ver total de ideias\n/categorias - ver categorias"
+          "🚀 Bem-vindo ao Ideavault!\n\nEnvie textos, imagens e vídeos para salvar suas ideias.\n\nComandos disponíveis:\n/listar - ver ideias salvas\n/total - ver total de ideias\n/categorias - ver categorias\n/buscar termo - buscar ideias"
         );
         return res.sendStatus(200);
       }
@@ -209,6 +252,24 @@ app.post("/webhook", async (req, res) => {
         const ideias = lerIdeias();
         const contagem = contarPorCategoria(ideias);
         await sendMessage(chatId, formatarCategorias(contagem));
+        return res.sendStatus(200);
+      }
+
+      if (textoRecebido.startsWith("/buscar")) {
+        const termo = textoRecebido.replace("/buscar", "").trim();
+
+        if (!termo) {
+          await sendMessage(
+            chatId,
+            "⚠️ Use assim: /buscar termo\nEx: /buscar receita"
+          );
+          return res.sendStatus(200);
+        }
+
+        const ideias = lerIdeias();
+        const resultados = buscarIdeias(ideias, termo);
+
+        await sendMessage(chatId, formatarBusca(resultados, termo));
         return res.sendStatus(200);
       }
 
