@@ -328,15 +328,15 @@ function gerarHTMLIdeias(ideias, categoriaAtual = "", buscaAtual = "") {
       .brand {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 0;
         text-decoration: none;
         flex-shrink: 0;
-        min-width: 170px;
+        min-width: auto;
       }
 
       .logo {
-        width: 34px;
-        height: 34px;
+        width: 64px;
+        height: 64px;
         object-fit: contain;
         border-radius: 8px;
         display: block;
@@ -344,12 +344,6 @@ function gerarHTMLIdeias(ideias, categoriaAtual = "", buscaAtual = "") {
         padding: 0;
       }
 
-      .brand-name {
-        font-size: 14px;
-        font-weight: 800;
-        letter-spacing: 0.6px;
-        color: #1d4ed8;
-      }
 
       .search-wrap {
         flex: 1;
@@ -621,7 +615,6 @@ function gerarHTMLIdeias(ideias, categoriaAtual = "", buscaAtual = "") {
       <div class="topbar-inner">
         <a class="brand" href="/ideavault/ideias">
           <img class="logo" src="${LOGO_URL}" alt="Logo Ideavault" />
-          <span class="brand-name"></span>
         </a>
 
         <div class="search-wrap">
