@@ -1,0 +1,282 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f7f7f7;
+  color: #111827;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(255,255,255,0.96);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid #ececec;
+}
+
+.topbar-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 10px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.logo {
+  width: 250px;
+  object-fit: contain;
+}
+
+.search-form {
+  flex: 1;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.search-form input {
+  flex: 1;
+  min-width: 180px;
+  background: #efefef;
+  border-radius: 999px;
+  border: none;
+  padding: 12px 16px;
+  outline: none;
+}
+
+.search-form button,
+.clear-btn {
+  border-radius: 999px;
+  border: none;
+  background: #111827;
+  color: #fff;
+  padding: 10px 14px;
+  cursor: pointer;
+}
+
+.clear-btn {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+.hero {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 18px 15px 8px;
+}
+
+.hero-content {
+  background: #fff;
+  padding: 22px;
+  border-radius: 24px;
+  box-shadow: 0 6px 22px rgba(0,0,0,0.05);
+}
+
+.hero h1 {
+  margin: 0 0 8px;
+  font-size: 38px;
+}
+
+.hero p {
+  margin: 0;
+  color: #4b5563;
+}
+
+.hero-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.hero-stats span {
+  background: #f3f4f6;
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.filters-section {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 10px 15px;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.filter-btn {
+  border: none;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: #eee;
+  color: #111827;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.filter-btn.active {
+  background: #111827;
+  color: #fff;
+}
+
+.gallery-section {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 15px;
+}
+
+.gallery {
+  column-count: 4;
+  column-gap: 18px;
+}
+
+.pin {
+  display: inline-block;
+  width: 100%;
+  margin: 0 0 18px;
+  background: #fff;
+  border-radius: 22px;
+  padding: 0;
+  overflow: hidden;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+  border: 1px solid #ececec;
+  break-inside: avoid;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.pin:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.12);
+}
+
+.pin-top {
+  height: 90px;
+  padding: 14px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  background: linear-gradient(135deg, #dbeafe, #eff6ff);
+}
+
+.pin[data-category="Receita"] .pin-top {
+  background: linear-gradient(135deg, #fde68a, #fff7ed);
+}
+
+.pin[data-category="Construção"] .pin-top {
+  background: linear-gradient(135deg, #d1d5db, #f3f4f6);
+}
+
+.pin[data-category="Decoração"] .pin-top {
+  background: linear-gradient(135deg, #fbcfe8, #fdf2f8);
+}
+
+.pin[data-category="Organização"] .pin-top {
+  background: linear-gradient(135deg, #bbf7d0, #f0fdf4);
+}
+
+.pin[data-category="DIY"] .pin-top {
+  background: linear-gradient(135deg, #fed7aa, #fff7ed);
+}
+
+.pin[data-category="Outros"] .pin-top {
+  background: linear-gradient(135deg, #e5e7eb, #f9fafb);
+}
+
+.tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.88);
+  color: #111827;
+}
+
+.pin-body {
+  padding: 16px;
+}
+
+.pin h3 {
+  margin: 0 0 10px;
+  font-size: 18px;
+}
+
+.pin p {
+  margin: 0;
+  color: #374151;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  font-size: 14px;
+}
+
+.pin-footer {
+  padding: 0 16px 16px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.empty-state {
+  background: #fff;
+  padding: 30px;
+  border-radius: 20px;
+  text-align: center;
+}
+
+.footer {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px 15px 40px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+@media (max-width: 900px) {
+  .gallery {
+    column-count: 2;
+  }
+
+  .hero h1 {
+    font-size: 30px;
+  }
+}
+
+@media (max-width: 600px) {
+  .topbar-inner {
+    flex-wrap: wrap;
+  }
+
+  .logo {
+    width: 150px;
+  }
+
+  .search-form {
+    width: 100%;
+  }
+
+  .gallery {
+    column-count: 1;
+  }
+
+  .footer {
+    flex-direction: column;
+  }
+}
