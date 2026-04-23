@@ -254,10 +254,6 @@ function gerarHTMLIdeias(ideias, categoriaAtual = "", buscaAtual = "") {
     );
   }
 
-  const destaqueTitulo = categoriaAtual
-    ? categoriaAtual
-    : "Galeria de ideias";
-
   const destaqueResumo = buscaAtual
     ? `Resultados relacionados a "${escapeHtml(buscaAtual)}".`
     : categoriaAtual
@@ -315,7 +311,7 @@ function gerarHTMLIdeias(ideias, categoriaAtual = "", buscaAtual = "") {
         position: sticky;
         top: 0;
         z-index: 50;
-        background: rgba(255,255,255,0.95);
+        background: rgba(255,255,255,0.96);
         backdrop-filter: blur(10px);
         border-bottom: 1px solid #ececec;
       }
@@ -323,38 +319,36 @@ function gerarHTMLIdeias(ideias, categoriaAtual = "", buscaAtual = "") {
       .topbar-inner {
         max-width: 1400px;
         margin: 0 auto;
-        padding: 14px 20px;
+        padding: 10px 18px;
         display: flex;
         align-items: center;
         gap: 14px;
-        flex-wrap: wrap;
       }
 
       .brand {
         display: flex;
         align-items: center;
-        gap: 12px;
-        min-width: 220px;
+        gap: 8px;
+        text-decoration: none;
+        flex-shrink: 0;
+        min-width: 170px;
       }
 
       .logo {
-        width: 44px;
-        height: 44px;
+        width: 34px;
+        height: 34px;
         object-fit: contain;
-        border-radius: 12px;
-        background: #0f172a;
-        padding: 6px;
+        border-radius: 8px;
+        display: block;
+        background: transparent;
+        padding: 0;
       }
 
-      .brand strong {
-        display: block;
-        font-size: 18px;
-      }
-
-      .brand span {
-        display: block;
-        font-size: 12px;
-        color: #6b7280;
+      .brand-name {
+        font-size: 14px;
+        font-weight: 800;
+        letter-spacing: 0.6px;
+        color: #1d4ed8;
       }
 
       .search-wrap {
@@ -364,7 +358,8 @@ function gerarHTMLIdeias(ideias, categoriaAtual = "", buscaAtual = "") {
 
       .search-form {
         display: flex;
-        gap: 10px;
+        align-items: center;
+        gap: 8px;
         flex-wrap: wrap;
       }
 
@@ -375,18 +370,19 @@ function gerarHTMLIdeias(ideias, categoriaAtual = "", buscaAtual = "") {
         outline: none;
         background: #efefef;
         border-radius: 999px;
-        padding: 14px 18px;
-        font-size: 14px;
+        padding: 12px 16px;
+        font-size: 13px;
       }
 
       .search-form button,
       .clear-btn {
         border: none;
         border-radius: 999px;
-        padding: 12px 16px;
-        font-size: 14px;
+        padding: 10px 14px;
+        font-size: 12px;
         cursor: pointer;
         text-decoration: none;
+        white-space: nowrap;
       }
 
       .search-form button {
@@ -587,13 +583,28 @@ function gerarHTMLIdeias(ideias, categoriaAtual = "", buscaAtual = "") {
         }
       }
 
+      @media (max-width: 640px) {
+        .topbar-inner {
+          flex-wrap: wrap;
+          padding: 12px 14px;
+        }
+
+        .brand {
+          min-width: auto;
+        }
+
+        .search-wrap {
+          width: 100%;
+        }
+
+        .search-form {
+          flex-wrap: wrap;
+        }
+      }
+
       @media (max-width: 460px) {
         .galeria {
           column-count: 1;
-        }
-
-        .topbar-inner {
-          padding: 12px 14px;
         }
 
         .hero,
@@ -608,13 +619,10 @@ function gerarHTMLIdeias(ideias, categoriaAtual = "", buscaAtual = "") {
   <body>
     <div class="topbar">
       <div class="topbar-inner">
-        <div class="brand">
+        <a class="brand" href="/ideavault/ideias">
           <img class="logo" src="${LOGO_URL}" alt="Logo Ideavault" />
-          <div>
-            <strong>Ideavault</strong>
-            <span>Seu cofre inteligente de ideias</span>
-          </div>
-        </div>
+          <span class="brand-name">IDEAVAULT</span>
+        </a>
 
         <div class="search-wrap">
           <form class="search-form" method="GET" action="/ideavault/ideias">
@@ -634,7 +642,7 @@ function gerarHTMLIdeias(ideias, categoriaAtual = "", buscaAtual = "") {
 
     <section class="hero">
       <div class="hero-box">
-        <h1>${escapeHtml(destaqueTitulo)}.</h1>
+        <h1>Galeria de ideias.</h1>
         <p>${destaqueResumo}</p>
 
         <div class="hero-meta">
