@@ -621,7 +621,7 @@ function gerarHTMLIdeias(ideias, categoriaAtual = "", buscaAtual = "") {
       <div class="topbar-inner">
         <a class="brand" href="/ideavault/ideias">
           <img class="logo" src="${LOGO_URL}" alt="Logo Ideavault" />
-          <span class="brand-name">IDEAVAULT</span>
+          <span class="brand-name"></span>
         </a>
 
         <div class="search-wrap">
