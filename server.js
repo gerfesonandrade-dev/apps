@@ -424,6 +424,10 @@ app.get("/", (req, res) => {
   res.redirect("/ideavault/ideias");
 });
 
+app.get("/ideavault", (req, res) => {
+  res.redirect("/ideavault/ideias");
+});
+
 app.get("/ideavault/ideias", (req, res) => {
   const ideias = lerIdeias();
   const categoria = req.query.categoria || "";
