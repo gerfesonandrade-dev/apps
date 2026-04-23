@@ -335,8 +335,8 @@ function gerarHTMLIdeias(ideias, categoriaAtual = "", buscaAtual = "") {
       }
 
       .logo {
-        width: 64px;
-        height: 64px;
+        width: 96px;
+        height: 96px;
         object-fit: contain;
         border-radius: 8px;
         display: block;
@@ -587,6 +587,11 @@ function gerarHTMLIdeias(ideias, categoriaAtual = "", buscaAtual = "") {
           min-width: auto;
         }
 
+        .logo {
+          width: 72px;
+          height: 72px;
+        }
+
         .search-wrap {
           width: 100%;
         }
@@ -614,7 +619,7 @@ function gerarHTMLIdeias(ideias, categoriaAtual = "", buscaAtual = "") {
     <div class="topbar">
       <div class="topbar-inner">
         <a class="brand" href="/ideavault/ideias">
-          <img class="logo" src="${LOGO_URL}" alt="Logo Ideavault" />
+          <img class="logo" src="${LOGO_URL}" alt="Logo" />
         </a>
 
         <div class="search-wrap">
