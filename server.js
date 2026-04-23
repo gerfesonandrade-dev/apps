@@ -117,22 +117,43 @@ async function sendMessage(chatId, text) {
 // ========================
 // HTML
 // ========================
-function gerarHTML(ideias, categoria = "", busca = "") {
+function escapeHtml(texto = "") {
+  return texto
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
 
+function gerarHTML(ideias, categoria = "", busca = "") {
   const ideiasFiltradas = filtrarIdeias(ideias, categoria, busca);
   const categorias = [...new Set(ideias.map(i => i.categoria))];
 
-  const cards = ideiasFiltradas.reverse().map((i, index) => {
-    const alturas = ["alto", "medio", "baixo"];
-    const tipoAltura = alturas[index % 3];
+  const cards = ideiasFiltradas
+    .slice()
+    .reverse()
+    .map((i, index) => {
+      const alturas = ["alto", "medio", "baixo"];
+      const tipoAltura = alturas[index % 3];
 
-    return `
-      <div class="pin ${tipoAltura}">
-        <div class="tag">${i.categoria}</div>
-        <p>${i.conteudo}</p>
-      </div>
-    `;
-  }).join("");
+      return `
+        <article class="pin ${tipoAltura}" data-categoria="${escapeHtml(i.categoria || "Outros")}">
+          <div class="pin-topo-visual">
+            <span class="tag">${escapeHtml(i.categoria || "Outros")}</span>
+          </div>
+
+          <div class="pin-body">
+            <h3>${escapeHtml(i.categoria || "Ideia")}</h3>
+            <p>${escapeHtml(i.conteudo || "")}</p>
+          </div>
+
+          <div class="pin-footer">
+            ${i.data ? new Date(i.data).toLocaleString("pt-BR") : ""}
+          </div>
+        </article>
+      `;
+    })
+    .join("");
 
   return `
 <!DOCTYPE html>
@@ -146,10 +167,10 @@ function gerarHTML(ideias, categoria = "", busca = "") {
 <style>
 
 body {
-  margin:0;
-  font-family: Arial;
-  background:#f7f7f7;
-  color:#111827;
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f7f7f7;
+  color: #111827;
 }
 
 /* TOPO */
@@ -199,6 +220,7 @@ body {
   border-radius: 999px;
   border: none;
   padding: 12px;
+  outline: none;
 }
 
 .search-form button {
@@ -206,54 +228,153 @@ body {
   border: none;
   background: #111827;
   color: #fff;
-  padding: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
 }
 
 /* HERO */
 .hero {
-  background:#fff;
-  margin:15px;
-  padding:20px;
-  border-radius:20px;
+  background: #fff;
+  margin: 15px;
+  padding: 20px;
+  border-radius: 20px;
 }
 
 /* FILTROS */
 .filtros {
-  padding:10px 15px;
+  padding: 10px 15px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .filtros a {
-  margin-right:10px;
-  padding:6px 12px;
-  border-radius:20px;
-  background:#eee;
-  text-decoration:none;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: #eee;
+  text-decoration: none;
+  color: #111827;
+  font-size: 13px;
 }
 
 /* GALERIA */
 .galeria {
-  column-count:4;
-  padding:15px;
+  column-count: 4;
+  column-gap: 18px;
+  padding: 15px;
 }
 
 .pin {
-  background:#fff;
-  margin-bottom:15px;
-  padding:15px;
-  border-radius:15px;
+  display: inline-block;
+  width: 100%;
+  margin: 0 0 18px;
+  background: #fff;
+  border-radius: 22px;
+  padding: 0;
+  overflow: hidden;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+  border: 1px solid #ececec;
+  break-inside: avoid;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
 
-.pin.alto { min-height:160px; }
-.pin.medio { min-height:110px; }
-.pin.baixo { min-height:70px; }
-
-@media(max-width:900px){
-  .galeria{column-count:2;}
+.pin:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.12);
 }
 
-@media(max-width:500px){
-  .galeria{column-count:1;}
-  .logo{width:72px;height:72px;}
+.pin-topo-visual {
+  height: 90px;
+  padding: 14px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  background: linear-gradient(135deg, #dbeafe, #eff6ff);
+}
+
+.pin[data-categoria="Receita"] .pin-topo-visual {
+  background: linear-gradient(135deg, #fde68a, #fff7ed);
+}
+
+.pin[data-categoria="Construção"] .pin-topo-visual {
+  background: linear-gradient(135deg, #d1d5db, #f3f4f6);
+}
+
+.pin[data-categoria="Decoração"] .pin-topo-visual {
+  background: linear-gradient(135deg, #fbcfe8, #fdf2f8);
+}
+
+.pin[data-categoria="Organização"] .pin-topo-visual {
+  background: linear-gradient(135deg, #bbf7d0, #f0fdf4);
+}
+
+.pin[data-categoria="DIY"] .pin-topo-visual {
+  background: linear-gradient(135deg, #fed7aa, #fff7ed);
+}
+
+.pin[data-categoria="Outros"] .pin-topo-visual {
+  background: linear-gradient(135deg, #e5e7eb, #f9fafb);
+}
+
+.pin-body {
+  padding: 16px;
+}
+
+.tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.88);
+  color: #111827;
+  backdrop-filter: blur(4px);
+}
+
+.pin h3 {
+  margin: 0 0 10px;
+  font-size: 18px;
+  line-height: 1.2;
+  color: #111827;
+}
+
+.pin p {
+  margin: 0;
+  color: #374151;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  font-size: 14px;
+}
+
+.pin.alto .pin-body p { min-height: 140px; }
+.pin.medio .pin-body p { min-height: 90px; }
+.pin.baixo .pin-body p { min-height: 55px; }
+
+.pin-footer {
+  padding: 0 16px 16px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+@media (max-width: 900px) {
+  .galeria {
+    column-count: 2;
+  }
+}
+
+@media (max-width: 500px) {
+  .galeria {
+    column-count: 1;
+  }
+
+  .logo {
+    width: 72px;
+    height: 72px;
+  }
+
+  .search-form {
+    flex-wrap: wrap;
+  }
 }
 
 </style>
@@ -264,13 +385,14 @@ body {
 <div class="topbar">
   <div class="topbar-inner">
     <a class="brand" href="/ideavault/ideias">
-      <img src="${LOGO_URL}" class="logo">
+      <img src="${LOGO_URL}" class="logo" alt="Logo Ideavault">
     </a>
 
     <div class="search-wrap">
-      <form class="search-form">
-        <input name="busca" placeholder="Pesquise receitas, construção..." value="${busca}">
-        <button>Buscar</button>
+      <form class="search-form" method="GET" action="/ideavault/ideias">
+        ${categoria ? `<input type="hidden" name="categoria" value="${escapeHtml(categoria)}">` : ""}
+        <input name="busca" placeholder="Pesquise receitas, construção..." value="${escapeHtml(busca)}">
+        <button type="submit">Buscar</button>
       </form>
     </div>
   </div>
@@ -283,7 +405,7 @@ body {
 
 <div class="filtros">
   <a href="/ideavault/ideias">Todas</a>
-  ${categorias.map(c => `<a href="/ideavault/ideias?categoria=${c}">${c}</a>`).join("")}
+  ${categorias.map(c => `<a href="/ideavault/ideias?categoria=${encodeURIComponent(c)}">${escapeHtml(c)}</a>`).join("")}
 </div>
 
 <div class="galeria">
