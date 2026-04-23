@@ -125,6 +125,16 @@ function escapeHtml(texto = "") {
     .replace(/"/g, "&quot;");
 }
 
+function gerarFiltroLink(nomeCategoria, categoriaAtual, busca) {
+  const ativo = categoriaAtual === nomeCategoria;
+  let href = `/ideavault/ideias?categoria=${encodeURIComponent(nomeCategoria)}`;
+  if (busca) {
+    href += `&busca=${encodeURIComponent(busca)}`;
+  }
+
+  return `<a class="${ativo ? "ativo" : ""}" href="${href}">${escapeHtml(nomeCategoria)}</a>`;
+}
+
 function gerarHTML(ideias, categoria = "", busca = "") {
   const ideiasFiltradas = filtrarIdeias(ideias, categoria, busca);
   const categorias = [...new Set(ideias.map(i => i.categoria))];
@@ -165,7 +175,6 @@ function gerarHTML(ideias, categoria = "", busca = "") {
 <link rel="icon" href="${FAVICON_URL}">
 
 <style>
-
 body {
   margin: 0;
   font-family: Arial, sans-serif;
@@ -212,6 +221,7 @@ body {
 .search-form {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .search-form input {
@@ -223,13 +233,22 @@ body {
   outline: none;
 }
 
-.search-form button {
+.search-form button,
+.search-form .clear-btn {
   border-radius: 999px;
   border: none;
   background: #111827;
   color: #fff;
   padding: 10px 14px;
   cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+.search-form .clear-btn {
+  background: #e5e7eb;
+  color: #111827;
 }
 
 /* HERO */
@@ -255,6 +274,12 @@ body {
   text-decoration: none;
   color: #111827;
   font-size: 13px;
+  transition: 0.2s ease;
+}
+
+.filtros a.ativo {
+  background: #111827;
+  color: #fff;
 }
 
 /* GALERIA */
@@ -376,7 +401,6 @@ body {
     flex-wrap: wrap;
   }
 }
-
 </style>
 </head>
 
@@ -393,6 +417,7 @@ body {
         ${categoria ? `<input type="hidden" name="categoria" value="${escapeHtml(categoria)}">` : ""}
         <input name="busca" placeholder="Pesquise receitas, construção..." value="${escapeHtml(busca)}">
         <button type="submit">Buscar</button>
+        <a class="clear-btn" href="/ideavault/ideias">Limpar</a>
       </form>
     </div>
   </div>
@@ -404,8 +429,8 @@ body {
 </div>
 
 <div class="filtros">
-  <a href="/ideavault/ideias">Todas</a>
-  ${categorias.map(c => `<a href="/ideavault/ideias?categoria=${encodeURIComponent(c)}">${escapeHtml(c)}</a>`).join("")}
+  <a class="${!categoria ? "ativo" : ""}" href="/ideavault/ideias${busca ? `?busca=${encodeURIComponent(busca)}` : ""}">Todas</a>
+  ${categorias.map(c => gerarFiltroLink(c, categoria, busca)).join("")}
 </div>
 
 <div class="galeria">
