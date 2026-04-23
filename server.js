@@ -56,11 +56,7 @@ function salvarPendencias(pendencias) {
 
 function setPendencia(chatId, tipo) {
   const lista = lerPendencias().filter((p) => p.chatId !== chatId);
-  lista.push({
-    chatId,
-    tipo,
-    criadoEm: new Date().toISOString()
-  });
+  lista.push({ chatId, tipo, criadoEm: new Date().toISOString() });
   salvarPendencias(lista);
 }
 
@@ -89,7 +85,7 @@ function detectarCategoria(texto) {
 }
 
 // ========================
-// FILTRO
+// BUSCA / FILTRO
 // ========================
 function filtrarIdeias(ideias, categoria, busca) {
   let lista = [...ideias];
@@ -158,34 +154,60 @@ body {
 
 /* TOPO */
 .topbar {
-  position:sticky;
-  top:0;
-  background:#fff;
-  border-bottom:1px solid #eee;
-  z-index:50;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(255,255,255,0.96);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid #ececec;
 }
 
 .topbar-inner {
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding:10px 15px;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 10px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  text-decoration: none;
 }
 
 .logo {
-  width:96px;
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
 }
 
-.search {
-  flex:1;
+/* BUSCA */
+.search-wrap {
+  flex: 1;
 }
 
-.search input {
-  width:100%;
-  padding:10px;
-  border-radius:20px;
-  border:none;
-  background:#eee;
+.search-form {
+  display: flex;
+  gap: 8px;
+}
+
+.search-form input {
+  flex: 1;
+  background: #efefef;
+  border-radius: 999px;
+  border: none;
+  padding: 12px;
+}
+
+.search-form button {
+  border-radius: 999px;
+  border: none;
+  background: #111827;
+  color: #fff;
+  padding: 10px;
 }
 
 /* HERO */
@@ -196,10 +218,6 @@ body {
   border-radius:20px;
 }
 
-.hero h1 {
-  margin:0;
-}
-
 /* FILTROS */
 .filtros {
   padding:10px 15px;
@@ -207,11 +225,10 @@ body {
 
 .filtros a {
   margin-right:10px;
-  text-decoration:none;
   padding:6px 12px;
   border-radius:20px;
   background:#eee;
-  font-size:12px;
+  text-decoration:none;
 }
 
 /* GALERIA */
@@ -225,19 +242,11 @@ body {
   margin-bottom:15px;
   padding:15px;
   border-radius:15px;
-  break-inside:avoid;
 }
 
 .pin.alto { min-height:160px; }
 .pin.medio { min-height:110px; }
 .pin.baixo { min-height:70px; }
-
-.tag {
-  font-size:11px;
-  font-weight:bold;
-  color:#555;
-  margin-bottom:8px;
-}
 
 @media(max-width:900px){
   .galeria{column-count:2;}
@@ -245,7 +254,7 @@ body {
 
 @media(max-width:500px){
   .galeria{column-count:1;}
-  .logo{width:72px;}
+  .logo{width:72px;height:72px;}
 }
 
 </style>
@@ -255,11 +264,14 @@ body {
 
 <div class="topbar">
   <div class="topbar-inner">
-    <img src="${LOGO_URL}" class="logo">
+    <a class="brand" href="/ideavault/ideias">
+      <img src="${LOGO_URL}" class="logo">
+    </a>
 
-    <div class="search">
-      <form>
-        <input name="busca" placeholder="Pesquise receitas, construção, decoração..." value="${busca}">
+    <div class="search-wrap">
+      <form class="search-form">
+        <input name="busca" placeholder="Pesquise receitas, construção..." value="${busca}">
+        <button>Buscar</button>
       </form>
     </div>
   </div>
@@ -299,7 +311,7 @@ app.get("/ideavault/ideias", (req, res) => {
 });
 
 // ========================
-// BOT
+// WEBHOOK
 // ========================
 app.post("/ideavault/webhook", async (req, res) => {
   const msg = req.body.message;
