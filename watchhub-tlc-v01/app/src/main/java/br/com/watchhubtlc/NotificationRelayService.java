@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 
+import java.util.Locale;
+
 public class NotificationRelayService extends NotificationListenerService {
 
     @Override
@@ -17,7 +19,12 @@ public class NotificationRelayService extends NotificationListenerService {
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
         if (sbn == null || sbn.getNotification() == null) return;
-        if (getPackageName().equals(sbn.getPackageName())) return;
+        String sourcePackage = sbn.getPackageName();
+        if (getPackageName().equals(sourcePackage)) return;
+
+        // Notificacoes pessoais continuam indo direto pelo Chronos. Evita duplicar
+        // WhatsApp, Instagram, chamadas, SMS, Telegram, Messenger e Gmail como TLC.
+        if (isPersonalSource(sourcePackage)) return;
 
         Notification notification = sbn.getNotification();
         if ((notification.flags & Notification.FLAG_GROUP_SUMMARY) != 0) return;
@@ -32,7 +39,7 @@ public class NotificationRelayService extends NotificationListenerService {
         if (title.isEmpty() && body.isEmpty()) return;
         if (!AlertEngine.matchesTlc(this, title, body)) return;
 
-        String signature = sbn.getPackageName() + "|" + AlertEngine.sanitize(title) + "|" + AlertEngine.sanitize(body);
+        String signature = sourcePackage + "|" + AlertEngine.sanitize(title) + "|" + AlertEngine.sanitize(body);
         long now = System.currentTimeMillis();
         String lastSig = AlertEngine.prefs(this).getString("last_relay_sig", "");
         long lastTs = AlertEngine.prefs(this).getLong("last_relay_ts", 0L);
@@ -41,7 +48,22 @@ public class NotificationRelayService extends NotificationListenerService {
 
         String priority = AlertEngine.inferPriority(title + " " + body);
         String outTitle = title.isEmpty() ? "TLC PAINEL" : title;
-        AlertEngine.send(this, outTitle, body, priority, "notif:" + sbn.getPackageName());
+        AlertEngine.send(this, outTitle, body, priority, "notif:" + sourcePackage);
+    }
+
+    private boolean isPersonalSource(String packageName) {
+        if (packageName == null) return false;
+        String p = packageName.toLowerCase(Locale.ROOT);
+        return p.contains("whatsapp")
+                || p.contains("instagram")
+                || p.contains("telegram")
+                || p.contains("messenger")
+                || p.contains("facebook.orca")
+                || p.contains("google.android.apps.messaging")
+                || p.contains("motorola.messaging")
+                || p.contains("android.dialer")
+                || p.contains("google.android.dialer")
+                || p.contains("google.android.gm");
     }
 
     private String text(CharSequence value) {
