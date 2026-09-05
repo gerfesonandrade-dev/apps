@@ -6,6 +6,7 @@
         android:allowBackup="true"
         android:label="Watch Hub TLC"
         android:theme="@android:style/Theme.Material.Light.NoActionBar">
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -21,5 +22,16 @@
                 <data android:scheme="watchhubtlc" android:host="alert" />
             </intent-filter>
         </activity>
+
+        <service
+            android:name=".NotificationRelayService"
+            android:label="TLC Notification Relay"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
+
     </application>
 </manifest>
