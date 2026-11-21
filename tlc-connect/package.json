@@ -1,0 +1,9 @@
+{
+  "name": "tlc-connect",
+  "version": "0.1.0",
+  "private": true,
+  "main": "backend/server.js",
+  "engines": { "node": ">=18" },
+  "scripts": { "start": "node backend/server.js", "test": "node --test backend/server.test.js" },
+  "dependencies": { "express": "^4.19.2" }
+}
