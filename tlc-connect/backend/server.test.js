@@ -22,3 +22,16 @@ test('fluxo completo: registro, evento, outbox, ack', async () => {
     assert.equal((await j('/api/outbox?status=pending', {}, reg.b.token)).b.items.length, 0);
   } finally { srv.close(); }
 });
+
+test('receptor /hook/:key guarda payload do bot', async () => {
+  const srv = createApp(path.join(os.tmpdir(), 'tlc-hook-' + Date.now() + '.json')).listen(0);
+  const base = 'http://localhost:' + srv.address().port;
+  try {
+    const reg = await (await fetch(base + '/api/auth/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: 'h@h.com', password: '12345678' }) })).json();
+    assert.equal((await fetch(base + '/hook/errada', { method: 'POST', body: '{}' })).status, 401);
+    const r = await fetch(base + '/hook/' + reg.apiKey, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ evento: 'x', n: 1 }) });
+    assert.equal(r.status, 200);
+    const list = await (await fetch(base + '/api/hooks', { headers: { Authorization: 'Bearer ' + reg.token } })).json();
+    assert.equal(list.items.length, 1); assert.equal(list.items[0].body.n, 1);
+  } finally { srv.close(); }
+});

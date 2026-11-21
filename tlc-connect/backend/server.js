@@ -76,6 +76,21 @@ function createApp(dbFile = DB_FILE) {
     item.status = 'sent'; item.sentAt = Date.now(); save(req.db); res.json(item);
   });
 
+  // Receptor genérico de webhooks (ex.: bot_TLC na distribuição). A chave vai na URL:
+  // POST /hook/<apiKey>  → guarda método, headers (sem credenciais) e corpo bruto.
+  app.all('/hook/:key', express.json({ limit: '200kb', type: () => true }), (req, res) => {
+    const db = load();
+    const user = db.users.find((u) => u.apiKey === req.params.key);
+    if (!user) return res.status(401).json({ error: 'chave inválida' });
+    const { authorization, cookie, ...headers } = req.headers;
+    db.hooks = (db.hooks || []).concat({ id: id(), userId: user.id, at: Date.now(), method: req.method, query: req.query, headers, body: req.body });
+    db.hooks = db.hooks.slice(-500);
+    save(db); res.json({ ok: true });
+  });
+  app.get('/api/hooks', auth, (req, res) => {
+    res.json({ items: (req.db.hooks || []).filter((h) => h.userId === req.user.id).slice(-50).reverse() });
+  });
+
   app.get('/api/health', (_, res) => res.json({ ok: true }));
   app.use(express.static(path.join(__dirname, '..', 'web')));
   return app;
