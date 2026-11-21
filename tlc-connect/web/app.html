@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Painel — TLC Connect</title><link rel="stylesheet" href="style.css"></head><body>
+<header class="nav"><b>TLC Connect</b><nav><a href="index.html">Início</a></nav></header>
+<div class="box">
+<div id="auth"><h2>Entrar / Criar conta</h2>
+<input id="email" type="email" placeholder="email"><input id="pw" type="password" placeholder="senha (8+)">
+<button class="btn" id="login">Entrar</button> <button class="btn" id="reg">Criar conta</button><p id="msg"></p></div>
+<div id="dash" hidden><h2>Credenciais</h2>
+<p>Cole o <b>token</b> no popup da extensão. O <b>bot_TLC</b> usa a <b>API key</b>.</p>
+<pre id="creds"></pre>
+<h2>Enviar via outbox (teste)</h2><input id="ph" placeholder="5511999999999"><input id="tx" placeholder="mensagem"><button class="btn" id="send">Enfileirar</button>
+<h2>Eventos recentes</h2><pre id="ev">—</pre></div></div>
+<script>
+const $=id=>document.getElementById(id);let creds;
+async function api(p,o={}){const r=await fetch(p,{...o,headers:{'Content-Type':'application/json',...(creds?{Authorization:'Bearer '+creds.token}:{})},body:o.body&&JSON.stringify(o.body)});return{ok:r.ok,b:await r.json()}}
+async function auth(path){const r=await api('/api/auth/'+path,{method:'POST',body:{email:$('email').value,password:$('pw').value}});
+ if(!r.ok)return $('msg').textContent=r.b.error;creds=r.b;$('auth').hidden=true;$('dash').hidden=false;$('creds').textContent='token:  '+creds.token+'\napiKey: '+creds.apiKey;refresh()}
+async function refresh(){const r=await api('/api/events');$('ev').textContent=r.b.items.map(e=>new Date(e.ts).toLocaleString()+'  '+e.event+'  '+JSON.stringify(e.payload)).join('\n')||'—'}
+$('login').onclick=()=>auth('login');$('reg').onclick=()=>auth('register');
+$('send').onclick=async()=>{const r=await api('/api/outbox',{method:'POST',body:{phone:$('ph').value,text:$('tx').value}});alert(r.ok?'Enfileirado':r.b.error)};
+</script></body></html>

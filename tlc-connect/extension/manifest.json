@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "TLC Connect",
+  "version": "0.1.0",
+  "description": "CRM dentro do WhatsApp Web: notas, etiquetas, respostas rápidas, agendamento e integração com o bot_TLC.",
+  "permissions": ["storage", "alarms", "tabs", "notifications"],
+  "host_permissions": ["https://web.whatsapp.com/*", "http://localhost:3000/*", "https://*/*"],
+  "background": { "service_worker": "background.js" },
+  "content_scripts": [
+    {
+      "matches": ["https://web.whatsapp.com/*"],
+      "js": ["selectors.js", "content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": { "default_title": "TLC Connect", "default_popup": "popup.html" },
+  "options_page": "popup.html"
+}

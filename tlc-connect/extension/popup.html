@@ -1,0 +1,14 @@
+<!doctype html>
+<meta charset="utf-8">
+<style>
+  body{font-family:Poppins,system-ui,sans-serif;width:320px;padding:12px;font-size:13px}
+  input{width:100%;padding:7px;margin:4px 0 10px;border:1px solid #d1d5db;border-radius:6px;box-sizing:border-box}
+  button{background:#2cae67;color:#fff;border:0;padding:8px 12px;border-radius:6px;cursor:pointer}
+  h3{color:#1b224e;margin-top:0}
+</style>
+<h3>TLC Connect</h3>
+<label>URL do backend</label><input id="backendUrl" placeholder="http://localhost:3000">
+<label>Token / API key</label><input id="token" placeholder="obtido no painel web">
+<label>Webhook (bot_TLC)</label><input id="webhookUrl" placeholder="https://.../hook">
+<button id="save">Salvar</button> <span id="ok"></span>
+<script src="popup.js"></script>
